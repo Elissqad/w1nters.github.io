@@ -1,1 +1,422 @@
 
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кликер - нажми на кнопку!</title>
+    <style>
+        * {
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e1e2f, #2a2a3b);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(30, 30, 47, 0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 60px;
+            padding: 30px 40px 40px;
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 0 0 10px 0;
+            background: linear-gradient(135deg, #FFD966, #FFB347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .score-board {
+            background: #0f0f1a;
+            border-radius: 60px;
+            padding: 15px 30px;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 5px 10px rgba(0,0,0,0.2);
+        }
+
+        .score-label {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            color: #aaa;
+        }
+
+        .score-value {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1;
+            color: #FFD966;
+            text-shadow: 0 0 8px #ffb34780;
+        }
+
+        .click-area {
+            margin: 25px 0;
+        }
+
+        .click-btn {
+            background: radial-gradient(circle at 30% 20%, #FFD966, #E67E22);
+            border: none;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            font-size: 3rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 4px #b45f1b;
+            cursor: pointer;
+            box-shadow: 0 20px 25px -8px black, inset 0 -4px 0 #b45f1b;
+            transition: 0.05s linear;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .click-btn:active {
+            transform: scale(0.96);
+            box-shadow: 0 8px 15px -5px black;
+        }
+
+        .bonus-panel {
+            background: #232332;
+            border-radius: 40px;
+            padding: 15px 20px;
+            margin-top: 25px;
+        }
+
+        .bonus-title {
+            font-weight: bold;
+            color: #FFB347;
+            margin-bottom: 12px;
+        }
+
+        .upgrade {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1b1b28;
+            margin: 12px 0;
+            padding: 10px 20px;
+            border-radius: 50px;
+            gap: 15px;
+        }
+
+        .upgrade-info {
+            text-align: left;
+            flex: 2;
+        }
+
+        .upgrade-name {
+            font-weight: bold;
+            color: #ddd;
+        }
+
+        .upgrade-desc {
+            font-size: 0.75rem;
+            color: #aaa;
+        }
+
+        .upgrade-cost {
+            font-family: monospace;
+            font-size: 1.1rem;
+            background: #0a0a12;
+            padding: 5px 12px;
+            border-radius: 30px;
+            color: #FFD966;
+        }
+
+        .buy-btn {
+            background: #3a3a55;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .buy-btn:active {
+            transform: scale(0.96);
+        }
+
+        .buy-btn:disabled {
+            opacity: 0.5;
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        .reset-btn {
+            background: #2c2c3e;
+            border: 1px solid #ff8c5a;
+            margin-top: 20px;
+            padding: 8px 20px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #ffaa77;
+            cursor: pointer;
+        }
+
+        .click-effect {
+            position: fixed;
+            pointer-events: none;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FFE484;
+            text-shadow: 0 0 5px orange;
+            animation: floatUp 0.6s ease-out forwards;
+            z-index: 999;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -30%) scale(0.8);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -120%) scale(1.3);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <h1>✨ КЛИКЕР ✨</h1>
+    <div class="score-board">
+        <div class="score-label">🍪 ПЕЧЕНЬКИ 🍪</div>
+        <div class="score-value" id="scoreDisplay">0</div>
+    </div>
+
+    <div class="click-area">
+        <button class="click-btn" id="clickButton">🍪<br>КЛИК</button>
+    </div>
+
+    <div class="bonus-panel">
+        <div class="bonus-title">⚡ УЛУЧШЕНИЯ ⚡</div>
+        <div class="upgrade" id="upgradeClickDiv">
+            <div class="upgrade-info">
+                <div class="upgrade-name">🤚 Усиленный клик</div>
+                <div class="upgrade-desc">+1 печенька за клик</div>
+            </div>
+            <div class="upgrade-cost" id="clickCost">10</div>
+            <button class="buy-btn" id="buyClickUpgrade">купить</button>
+        </div>
+        <div class="upgrade" id="upgradeAutoDiv">
+            <div class="upgrade-info">
+                <div class="upgrade-name">🤖 Автокликер</div>
+                <div class="upgrade-desc">даёт 1 печеньку/сек</div>
+            </div>
+            <div class="upgrade-cost" id="autoCost">50</div>
+            <button class="buy-btn" id="buyAutoUpgrade">купить</button>
+        </div>
+    </div>
+    <button class="reset-btn" id="resetBtn">⟳ СБРОС ПРОГРЕССА</button>
+</div>
+
+<script>
+    // --- Игровое состояние ---
+    let cookies = 0;            // текущие печеньки
+    let clickPower = 1;        // печенек за клик
+    let autoPower = 0;         // печенек в секунду
+    let clickUpgradeCost = 10;  // стоимость улучшения клика
+    let autoUpgradeCost = 50;    // стоимость автокликера
+
+    // Элементы DOM
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const clickButton = document.getElementById('clickButton');
+    const buyClickBtn = document.getElementById('buyClickUpgrade');
+    const buyAutoBtn = document.getElementById('buyAutoUpgrade');
+    const clickCostSpan = document.getElementById('clickCost');
+    const autoCostSpan = document.getElementById('autoCost');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // --- Вспомогательные функции ---
+    function updateUI() {
+        // Отображаем количество печенек (округляем до целых)
+        scoreDisplay.innerText = Math.floor(cookies);
+
+        // Обновляем стоимость в кнопках
+        clickCostSpan.innerText = clickUpgradeCost;
+        autoCostSpan.innerText = autoUpgradeCost;
+
+        // Блокируем/разблокируем кнопки покупки
+        buyClickBtn.disabled = (cookies < clickUpgradeCost);
+        buyAutoBtn.disabled = (cookies < autoUpgradeCost);
+    }
+
+    // Эффект "+число" при клике или авто-клике (опционально только для клика)
+    function showFloatingNumber(value, x, y) {
+        const div = document.createElement('div');
+        div.innerText = `+${value}`;
+        div.className = 'click-effect';
+        div.style.left = `${x}px`;
+        div.style.top = `${y}px`;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 600);
+    }
+
+    // Добавить печеньки (можно вызвать из клика, авто-кликера, сохранения)
+    function addCookies(amount, isAuto = false, event = null) {
+        if (amount === 0) return;
+        const oldCookies = cookies;
+        cookies += amount;
+        if (cookies < 0) cookies = 0; // на всякий случай
+        updateUI();
+
+        // Визуальный эффект +число при клике мышкой
+        if (!isAuto && event && event.clientX) {
+            showFloatingNumber(amount, event.clientX, event.clientY);
+        } else if (!isAuto && !event) {
+            // фолбэк - эффект в центре кнопки (редко)
+            const btnRect = clickButton.getBoundingClientRect();
+            showFloatingNumber(amount, btnRect.left + btnRect.width/2, btnRect.top + btnRect.height/2);
+        }
+
+        // Сохраняем игру после каждого изменения
+        saveGame();
+    }
+
+    // Покупка улучшения клика
+    function buyClickUpgrade() {
+        if (cookies >= clickUpgradeCost) {
+            cookies -= clickUpgradeCost;
+            clickPower++;
+            // новая стоимость = базовая формула (старая * 1.7, округлённая вниз)
+            clickUpgradeCost = Math.floor(clickUpgradeCost * 1.7);
+            if (clickUpgradeCost < 1) clickUpgradeCost = 1;
+            updateUI();
+            saveGame();
+
+            // всплывающее уведомление через alert не делаем, просто эффект красивый
+            const rect = buyClickBtn.getBoundingClientRect();
+            showFloatingNumber(`💪 мощь +1`, rect.left + rect.width/2, rect.top);
+        }
+    }
+
+    // Покупка автокликера
+    function buyAutoUpgrade() {
+        if (cookies >= autoUpgradeCost) {
+            cookies -= autoUpgradeCost;
+            autoPower++;
+            autoUpgradeCost = Math.floor(autoUpgradeCost * 1.8);
+            if (autoUpgradeCost < 1) autoUpgradeCost = 1;
+            updateUI();
+            saveGame();
+
+            const rect = buyAutoBtn.getBoundingClientRect();
+            showFloatingNumber(`🤖 автоклик +1/сек`, rect.left + rect.width/2, rect.top);
+
+            // Если автокликер был 0 -> запускаем таймер аккуратно, но таймер и так работает.
+            // Но для красоты перезапускать не надо — интервал уже работает.
+        }
+    }
+
+    // Сброс всей игры
+    function resetGame() {
+        if (confirm('Сбросить весь прогресс? Печеньки и улучшения обнулятся.')) {
+            cookies = 0;
+            clickPower = 1;
+            autoPower = 0;
+            clickUpgradeCost = 10;
+            autoUpgradeCost = 50;
+            updateUI();
+            saveGame();
+            // маленькая анимация (опционально)
+            alert('Прогресс сброшен!');
+        }
+    }
+
+    // --- Сохранение и загрузка в localStorage ---
+    function saveGame() {
+        const gameState = {
+            cookies: cookies,
+            clickPower: clickPower,
+            autoPower: autoPower,
+            clickUpgradeCost: clickUpgradeCost,
+            autoUpgradeCost: autoUpgradeCost
+        };
+        localStorage.setItem('clickerSave', JSON.stringify(gameState));
+    }
+
+    function loadGame() {
+        const saved = localStorage.getItem('clickerSave');
+        if (saved) {
+            try {
+                const state = JSON.parse(saved);
+                cookies = state.cookies ?? 0;
+                clickPower = state.clickPower ?? 1;
+                autoPower = state.autoPower ?? 0;
+                clickUpgradeCost = state.clickUpgradeCost ?? 10;
+                autoUpgradeCost = state.autoUpgradeCost ?? 50;
+            } catch(e) { console.warn("ошибка загрузки"); }
+        }
+        updateUI();
+    }
+
+    // --- Обработчик клика по кнопке ---
+    function onMainClick(event) {
+        // получаем количество печенек за клик (clickPower)
+        addCookies(clickPower, false, event);
+        // добавляем небольшую тактильную отдачу (вибрация, если поддерживается)
+        if (navigator.vibrate) navigator.vibrate(50);
+    }
+
+    // --- Авто-клик (интервал) ---
+    let autoInterval = null;
+    function startAutoInterval() {
+        if (autoInterval) clearInterval(autoInterval);
+        autoInterval = setInterval(() => {
+            if (autoPower > 0) {
+                // добавляем печеньки от автокликера
+                let autoIncome = autoPower;
+                // эффект без привязки к координатам мыши, но добавим лёгкое уведомление
+                cookies += autoIncome;
+                updateUI();
+                saveGame();
+
+                // не спамим миллионами всплывающих окон, но можно показать один общий эффект
+                // показываем эффект только если autoIncome > 0 и не слишком часто? сделаем без всплывающих, чтобы не мешать.
+                // Вместо этого обновим счет. Можно добавить небольшой "пульс" счета
+                const scoreElem = document.getElementById('scoreDisplay');
+                if (scoreElem) {
+                    scoreElem.style.transform = 'scale(1.05)';
+                    setTimeout(() => { if(scoreElem) scoreElem.style.transform = ''; }, 150);
+                }
+            }
+        }, 1000);
+    }
+
+    // --- Инициализация и событийные слушатели ---
+    function init() {
+        loadGame();
+        startAutoInterval();
+
+        clickButton.addEventListener('click', onMainClick);
+        buyClickBtn.addEventListener('click', buyClickUpgrade);
+        buyAutoBtn.addEventListener('click', buyAutoUpgrade);
+        resetBtn.addEventListener('click', resetGame);
+
+        // перепроверим блокировку кнопок при загрузке
+        updateUI();
+    }
+
+    // Запускаем игру
+    init();
+</script>
+</body>
+</html>
