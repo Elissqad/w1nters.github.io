@@ -420,3 +420,710 @@
 </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Кликер | Магазин скинов и кастомизация</title>
+    <style>
+        * {
+            user-select: none;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-card: #16213e;
+            --accent: #e94560;
+            --accent-glow: #ff6b6b;
+            --text-light: #eee;
+            --text-dim: #aaa;
+            --gold: #f9b43a;
+            --btn-click: #6a2c70;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg-primary);
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            transition: background 0.3s ease;
+            padding: 20px;
+        }
+
+        /* Контейнеры */
+        .app {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 24px;
+        }
+
+        /* ЛЕВАЯ ЧАСТЬ: КЛИКЕР + АВАТАР */
+        .clicker-panel {
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(4px);
+            border-radius: 48px;
+            padding: 24px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .stats {
+            text-align: center;
+            background: #0f0f1c;
+            border-radius: 60px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+        }
+
+        .score-label {
+            font-size: 1rem;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+        }
+
+        .score-value {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--gold);
+            text-shadow: 0 0 10px #ffb34780;
+            line-height: 1;
+        }
+
+        .avatar-section {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .avatar {
+            width: 200px;
+            height: 200px;
+            background: #2d2d44;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 6rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            transition: transform 0.1s ease, background 0.2s;
+            cursor: pointer;
+            border: 3px solid var(--gold);
+        }
+
+        .avatar:active {
+            transform: scale(0.96);
+        }
+
+        .click-btn {
+            background: linear-gradient(145deg, var(--accent), #b52b4a);
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            border-radius: 80px;
+            color: white;
+            cursor: pointer;
+            transition: 0.05s linear;
+            box-shadow: 0 10px 0 #5a1e2f;
+            width: 80%;
+            margin-top: 10px;
+        }
+
+        .click-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #5a1e2f;
+        }
+
+        /* ПРАВАЯ ЧАСТЬ: МАГАЗИН И КАСТОМИЗАЦИЯ */
+        .shop-panel {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            border-radius: 48px;
+            padding: 20px;
+            border: 1px solid rgba(255,215,0,0.3);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #ffffff30;
+            padding-bottom: 8px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 1.2rem;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.2s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        /* Сетка магазина */
+        .items-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-height: 480px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        .shop-item {
+            background: #0f0f1ecc;
+            border-radius: 28px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: 0.1s;
+            border: 1px solid #ffffff1a;
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .item-icon {
+            font-size: 2.2rem;
+            background: #1e1e30;
+            width: 55px;
+            height: 55px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .item-name {
+            font-weight: bold;
+            color: white;
+        }
+
+        .item-desc {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+
+        .item-price {
+            color: var(--gold);
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.2rem;
+        }
+
+        button.buy-skin, button.equip-skin {
+            background: #2c2c48;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 60px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        button.equip-skin {
+            background: #4c6a3b;
+        }
+
+        button.buy-skin:active, button.equip-skin:active {
+            transform: scale(0.96);
+        }
+
+        .equipped-badge {
+            background: #f9b43a;
+            color: #1e1e2a;
+            padding: 5px 15px;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* Цветовые темы */
+        .theme-preview {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .theme-card {
+            background: #1e1e30;
+            border-radius: 20px;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.1s;
+        }
+
+        .theme-card.active-theme {
+            border-color: var(--gold);
+            background: #2a2a3f;
+        }
+
+        .theme-color {
+            width: 32px;
+            height: 32px;
+            border-radius: 60px;
+        }
+
+        /* Анимация +клик */
+        .float-number {
+            position: fixed;
+            pointer-events: none;
+            font-weight: bold;
+            font-size: 1.8rem;
+            color: gold;
+            text-shadow: 0 0 5px orange;
+            animation: floatPop 0.6s ease-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes floatPop {
+            0% { opacity: 1; transform: translate(-50%, -20%) scale(0.7);}
+            100% { opacity: 0; transform: translate(-50%, -120%) scale(1.4);}
+        }
+
+        /* полоса прокрутки */
+        .items-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        .items-grid::-webkit-scrollbar-track {
+            background: #2c2c44;
+            border-radius: 10px;
+        }
+        .items-grid::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+
+        @media (max-width: 800px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .avatar {
+                width: 150px;
+                height: 150px;
+                font-size: 4.5rem;
+            }
+        }
+    </style>
+</head>
+<body id="appBody">
+<div class="app">
+    <div class="main-grid">
+        <!-- ЛЕВАЯ СЕКЦИЯ: КЛИКЕР -->
+        <div class="clicker-panel">
+            <div class="stats">
+                <div class="score-label">🍪 МОНЕТЫ (ПЕЧЕНЬКИ) 🍪</div>
+                <div class="score-value" id="scoreDisplay">0</div>
+            </div>
+
+            <div class="avatar-section">
+                <div class="avatar" id="avatarBtn">
+                    <span id="avatarEmoji">😺</span>
+                </div>
+                <p style="margin: 8px 0; color:#aaa;">👇 нажми на аватар или кнопку</p>
+                <button class="click-btn" id="clickMainBtn">🍪 КЛИК! 🍪</button>
+            </div>
+            <div style="margin-top: 15px; text-align: center; font-size:0.8rem; color:#ccc;">
+                Сила клика: <strong id="clickPowerLabel">1</strong> | Авто-доход: <strong id="autoIncomeLabel">0</strong>/сек
+            </div>
+        </div>
+
+        <!-- ПРАВАЯ СЕКЦИЯ: МАГАЗИН + КАСТОМИЗАЦИЯ -->
+        <div class="shop-panel">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="upgrades">📈 Улучшения</button>
+                <button class="tab-btn" data-tab="skins">🎭 Скины (аватар)</button>
+                <button class="tab-btn" data-tab="themes">🎨 Цветовые темы</button>
+            </div>
+
+            <!-- Вкладка Улучшения (прокачка клика и авто) -->
+            <div class="tab-content active" id="tabUpgrades">
+                <div class="items-grid">
+                    <div class="shop-item">
+                        <div class="item-info"><div class="item-icon">💪</div><div><div class="item-name">Усиленный клик</div><div class="item-desc">+1 печенька за нажатие</div></div></div>
+                        <div><span class="item-price" id="clickUpgradeCostSpan">10</span> 🍪</div>
+                        <button class="buy-skin" id="buyClickUpgradeBtn">Купить</button>
+                    </div>
+                    <div class="shop-item">
+                        <div class="item-info"><div class="item-icon">🤖</div><div><div class="item-name">Автокликер</div><div class="item-desc">+1 печенька/сек</div></div></div>
+                        <div><span class="item-price" id="autoUpgradeCostSpan">50</span> 🍪</div>
+                        <button class="buy-skin" id="buyAutoUpgradeBtn">Купить</button>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; background:#0b0b16; border-radius: 28px; padding: 12px; text-align:center;">
+                    ⚡ Сила клика: <span id="clickPowerStat">1</span> &nbsp;|&nbsp; ⏱️ Авто/сек: <span id="autoPowerStat">0</span>
+                </div>
+            </div>
+
+            <!-- Вкладка СКИНЫ (персонажи/эмодзи) -->
+            <div class="tab-content" id="tabSkins">
+                <div class="items-grid" id="skinsList"></div>
+            </div>
+
+            <!-- Вкладка ЦВЕТОВЫЕ ТЕМЫ -->
+            <div class="tab-content" id="tabThemes">
+                <div class="items-grid" id="themesList"></div>
+            </div>
+            <button id="resetAllBtn" style="margin-top: 20px; width:100%; background:#2d2d44; border:none; padding: 10px; border-radius: 60px; color:#ffaa77; cursor:pointer;">🔄 СБРОСИТЬ ПРОГРЕСС</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // -------- ИГРОВОЕ СОСТОЯНИЕ ----------
+    let coins = 100;         // стартовые монеты, чтобы купить первый скин
+    let clickPower = 1;
+    let autoPower = 0;
+    let clickUpgradeCost = 10;
+    let autoUpgradeCost = 50;
+
+    // Кастомные скины (аватары) 
+    const skinsCatalog = [
+        { id: "cat", name: "Котенок", emoji: "😺", price: 0, owned: true, equipped: true },
+        { id: "dog", name: "Пёсик", emoji: "🐶", price: 50, owned: false, equipped: false },
+        { id: "dragon", name: "Дракон", emoji: "🐉", price: 150, owned: false, equipped: false },
+        { id: "alien", name: "Инопланетянин", emoji: "👽", price: 250, owned: false, equipped: false },
+        { id: "ninja", name: "Ниндзя", emoji: "🥷", price: 400, owned: false, equipped: false },
+        { id: "wizard", name: "Маг", emoji: "🧙", price: 600, owned: false, equipped: false }
+    ];
+
+    // Цветовые темы (меняют фон body)
+    const themesCatalog = [
+        { id: "dark", name: "Тёмная ночь", bg: "#1a1a2e", accent: "#e94560", price: 0, owned: true, equipped: true },
+        { id: "forest", name: "Мистический лес", bg: "#1e3b2c", accent: "#8bc34a", price: 80, owned: false, equipped: false },
+        { id: "ocean", name: "Глубины океана", bg: "#0f2b3d", accent: "#4db8ff", price: 120, owned: false, equipped: false },
+        { id: "sunset", name: "Пылающий закат", bg: "#4a2c2a", accent: "#ff9f4a", price: 180, owned: false, equipped: false },
+        { id: "royal", name: "Королевский пурпур", bg: "#2e1b3c", accent: "#c97bff", price: 300, owned: false, equipped: false }
+    ];
+
+    // Вспомогательные DOM элементы
+    const scoreSpan = document.getElementById("scoreDisplay");
+    const clickPowerLabel = document.getElementById("clickPowerLabel");
+    const autoIncomeLabel = document.getElementById("autoIncomeLabel");
+    const clickPowerStat = document.getElementById("clickPowerStat");
+    const autoPowerStat = document.getElementById("autoPowerStat");
+    const avatarEmojiSpan = document.getElementById("avatarEmoji");
+    const clickUpgradeCostSpan = document.getElementById("clickUpgradeCostSpan");
+    const autoUpgradeCostSpan = document.getElementById("autoUpgradeCostSpan");
+    const buyClickBtn = document.getElementById("buyClickUpgradeBtn");
+    const buyAutoBtn = document.getElementById("buyAutoUpgradeBtn");
+    const resetBtn = document.getElementById("resetAllBtn");
+    const appBody = document.getElementById("appBody");
+    const skinsContainer = document.getElementById("skinsList");
+    const themesContainer = document.getElementById("themesList");
+
+    // Сохранение / загрузка из localStorage
+    function saveGame() {
+        const save = {
+            coins, clickPower, autoPower, clickUpgradeCost, autoUpgradeCost,
+            skins: skinsCatalog.map(s => ({ id: s.id, owned: s.owned, equipped: s.equipped })),
+            themes: themesCatalog.map(t => ({ id: t.id, owned: t.owned, equipped: t.equipped }))
+        };
+        localStorage.setItem("clicker_custom_save", JSON.stringify(save));
+    }
+
+    function loadGame() {
+        const data = localStorage.getItem("clicker_custom_save");
+        if (!data) return;
+        try {
+            const saved = JSON.parse(data);
+            coins = saved.coins ?? 100;
+            clickPower = saved.clickPower ?? 1;
+            autoPower = saved.autoPower ?? 0;
+            clickUpgradeCost = saved.clickUpgradeCost ?? 10;
+            autoUpgradeCost = saved.autoUpgradeCost ?? 50;
+            if (saved.skins) {
+                saved.skins.forEach(s => {
+                    const skin = skinsCatalog.find(sk => sk.id === s.id);
+                    if (skin) { skin.owned = s.owned; skin.equipped = s.equipped; }
+                });
+            }
+            if (saved.themes) {
+                saved.themes.forEach(t => {
+                    const theme = themesCatalog.find(th => th.id === t.id);
+                    if (theme) { theme.owned = t.owned; theme.equipped = t.equipped; }
+                });
+            }
+            // убедимся, что хотя бы один скин и тема экипированы
+            if (!skinsCatalog.some(s => s.equipped)) skinsCatalog[0].equipped = true;
+            if (!themesCatalog.some(t => t.equipped)) themesCatalog[0].equipped = true;
+        } catch(e) {}
+        applyCurrentTheme();
+        updateAvatarFromSkin();
+    }
+
+    function applyCurrentTheme() {
+        const activeTheme = themesCatalog.find(t => t.equipped === true);
+        if (activeTheme) {
+            document.documentElement.style.setProperty('--bg-primary', activeTheme.bg);
+            document.documentElement.style.setProperty('--accent', activeTheme.accent);
+            document.documentElement.style.setProperty('--accent-glow', activeTheme.accent);
+        }
+    }
+
+    function updateAvatarFromSkin() {
+        const equippedSkin = skinsCatalog.find(s => s.equipped === true);
+        if (equippedSkin) avatarEmojiSpan.innerText = equippedSkin.emoji;
+    }
+
+    function updateUI() {
+        scoreSpan.innerText = Math.floor(coins);
+        clickPowerLabel.innerText = clickPower;
+        autoIncomeLabel.innerText = autoPower;
+        clickPowerStat.innerText = clickPower;
+        autoPowerStat.innerText = autoPower;
+        clickUpgradeCostSpan.innerText = clickUpgradeCost;
+        autoUpgradeCostSpan.innerText = autoUpgradeCost;
+        buyClickBtn.disabled = (coins < clickUpgradeCost);
+        buyAutoBtn.disabled = (coins < autoUpgradeCost);
+        renderSkinsShop();
+        renderThemesShop();
+        saveGame();
+    }
+
+    // отрисовка магазина скинов
+    function renderSkinsShop() {
+        skinsContainer.innerHTML = "";
+        for (let skin of skinsCatalog) {
+            const div = document.createElement("div");
+            div.className = "shop-item";
+            div.innerHTML = `
+                <div class="item-info">
+                    <div class="item-icon">${skin.emoji}</div>
+                    <div><div class="item-name">${skin.name}</div><div class="item-desc">Стоимость: ${skin.price} 🍪</div></div>
+                </div>
+                <div>
+                    ${skin.equipped ? '<span class="equipped-badge">✅ Экипирован</span>' : 
+                      (skin.owned ? `<button class="equip-skin" data-id="${skin.id}">🎽 Надеть</button>` : 
+                      `<button class="buy-skin" data-id="${skin.id}">💰 Купить ${skin.price}</button>`)}
+                </div>
+            `;
+            skinsContainer.appendChild(div);
+        }
+        // события на кнопках скинов
+        document.querySelectorAll('.buy-skin[data-id]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.getAttribute('data-id');
+                buySkin(id);
+            });
+        });
+        document.querySelectorAll('.equip-skin[data-id]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.getAttribute('data-id');
+                equipSkin(id);
+            });
+        });
+    }
+
+    function buySkin(skinId) {
+        const skin = skinsCatalog.find(s => s.id === skinId);
+        if (!skin || skin.owned) return;
+        if (coins >= skin.price) {
+            coins -= skin.price;
+            skin.owned = true;
+            updateUI();
+            // автоматически надеваем после покупки
+            equipSkin(skinId);
+        } else {
+            showFloatingText("Не хватает монет!", event);
+        }
+    }
+
+    function equipSkin(skinId) {
+        skinsCatalog.forEach(s => s.equipped = (s.id === skinId));
+        updateAvatarFromSkin();
+        updateUI();
+        showFloatingText("✨ Новый образ!", event);
+    }
+
+    // темы
+    function renderThemesShop() {
+        themesContainer.innerHTML = "";
+        for (let theme of themesCatalog) {
+            const div = document.createElement("div");
+            div.className = "theme-card" + (theme.equipped ? " active-theme" : "");
+            div.innerHTML = `
+                <div class="theme-color" style="background: ${theme.bg};"></div>
+                <div style="flex:1"><strong>${theme.name}</strong><br><span style="font-size:0.7rem;">${theme.price > 0 ? theme.price + " 🍪" : "бесплатно"}</span></div>
+                ${!theme.owned && theme.price > 0 ? `<button class="buy-skin" data-theme="${theme.id}">Купить</button>` : 
+                  (theme.owned && !theme.equipped ? `<button class="equip-skin" data-theme="${theme.id}">Надеть</button>` : 
+                  (theme.equipped ? '<span class="equipped-badge">✔️ Активна</span>' : ''))}
+            `;
+            themesContainer.appendChild(div);
+        }
+        document.querySelectorAll('[data-theme]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const themeId = btn.getAttribute('data-theme');
+                const theme = themesCatalog.find(t => t.id === themeId);
+                if (!theme) return;
+                if (!theme.owned && coins >= theme.price) {
+                    coins -= theme.price;
+                    theme.owned = true;
+                    updateUI();
+                }
+                if (theme.owned) {
+                    themesCatalog.forEach(t => t.equipped = false);
+                    theme.equipped = true;
+                    applyCurrentTheme();
+                    updateUI();
+                    showFloatingText(`🎨 тема ${theme.name}`, event);
+                }
+            });
+        });
+    }
+
+    function showFloatingText(text, ev) {
+        if (!ev) return;
+        const div = document.createElement('div');
+        div.innerText = text;
+        div.className = 'float-number';
+        div.style.left = `${ev.clientX}px`;
+        div.style.top = `${ev.clientY - 20}px`;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 700);
+    }
+
+    function addCoins(amount, ev) {
+        coins += amount;
+        if (coins < 0) coins = 0;
+        updateUI();
+        if (ev) {
+            const floatDiv = document.createElement('div');
+            floatDiv.innerText = `+${amount}`;
+            floatDiv.className = 'float-number';
+            floatDiv.style.left = `${ev.clientX}px`;
+            floatDiv.style.top = `${ev.clientY}px`;
+            document.body.appendChild(floatDiv);
+            setTimeout(() => floatDiv.remove(), 600);
+        }
+    }
+
+    function onClickHandler(ev) {
+        addCoins(clickPower, ev);
+        if (navigator.vibrate) navigator.vibrate(50);
+    }
+
+    function buyClickUpgrade() {
+        if (coins >= clickUpgradeCost) {
+            coins -= clickUpgradeCost;
+            clickPower++;
+            clickUpgradeCost = Math.floor(clickUpgradeCost * 1.6);
+            if (clickUpgradeCost < 5) clickUpgradeCost = 5;
+            updateUI();
+            showFloatingText("💪 Мощь клика +1", event);
+        }
+    }
+
+    function buyAutoUpgrade() {
+        if (coins >= autoUpgradeCost) {
+            coins -= autoUpgradeCost;
+            autoPower++;
+            autoUpgradeCost = Math.floor(autoUpgradeCost * 1.7);
+            if (autoUpgradeCost < 30) autoUpgradeCost = 30;
+            updateUI();
+            showFloatingText("🤖 Автокликер +1/сек", event);
+        }
+    }
+
+    function resetFullGame() {
+        if (confirm("Сбросить весь прогресс? Вернутся стандартные скины и темы.")) {
+            coins = 100;
+            clickPower = 1;
+            autoPower = 0;
+            clickUpgradeCost = 10;
+            autoUpgradeCost = 50;
+            skinsCatalog.forEach(s => {
+                s.owned = (s.id === "cat");
+                s.equipped = (s.id === "cat");
+            });
+            themesCatalog.forEach(t => {
+                t.owned = (t.id === "dark");
+                t.equipped = (t.id === "dark");
+            });
+            applyCurrentTheme();
+            updateAvatarFromSkin();
+            updateUI();
+            showFloatingText("Сброс выполнен", event);
+        }
+    }
+
+    // Авто-доход
+    let interval = setInterval(() => {
+        if (autoPower > 0) {
+            coins += autoPower;
+            updateUI();
+            // визуальный пульс
+            const scoreEl = document.getElementById("scoreDisplay");
+            if (scoreEl) scoreEl.style.transform = "scale(1.05)";
+            setTimeout(() => { if(scoreEl) scoreEl.style.transform = ""; }, 150);
+        }
+    }, 1000);
+
+    // Табы
+    function initTabs() {
+        const btns = document.querySelectorAll('.tab-btn');
+        btns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                document.getElementById(`tab${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`).classList.add('active');
+                btns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    }
+
+    document.getElementById("clickMainBtn").addEventListener('click', onClickHandler);
+    document.getElementById("avatarBtn").addEventListener('click', onClickHandler);
+    buyClickBtn.addEventListener('click', buyClickUpgrade);
+    buyAutoBtn.addEventListener('click', buyAutoUpgrade);
+    resetBtn.addEventListener('click', resetFullGame);
+    
+    loadGame();
+    updateUI();
+    initTabs();
+    applyCurrentTheme();
+    updateAvatarFromSkin();
+</script>
+</body>
+</html>
